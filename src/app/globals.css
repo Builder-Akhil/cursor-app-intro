@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-sky: var(--sky);
+  --color-mist: var(--mist);
+  --color-ink: var(--ink);
+  --color-sand: var(--sand);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Pastel sky blue + mist + soft sand */
+  --background: #f4f8fc;
+  --foreground: #1a2a3a;
+  --card: #ffffffcc;
+  --card-foreground: #1a2a3a;
+  --popover: #ffffff;
+  --popover-foreground: #1a2a3a;
+  --primary: #3b6fd4;
+  --primary-foreground: #f8fbff;
+  --secondary: #e8f1f8;
+  --secondary-foreground: #1a2a3a;
+  --muted: #e8f1f8;
+  --muted-foreground: #5a6f82;
+  --accent: #dce9f5;
+  --accent-foreground: #1a2a3a;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #c9d9e8;
+  --input: #c9d9e8;
+  --ring: #6b8fd4;
+  --chart-1: #6b8fd4;
+  --chart-2: #8bb8a8;
+  --chart-3: #e8d5b7;
+  --chart-4: #9bb0c4;
+  --chart-5: #5a7aa0;
+  --radius: 0.875rem;
+  --sidebar: #eef5fb;
+  --sidebar-foreground: #1a2a3a;
+  --sidebar-primary: #3b6fd4;
+  --sidebar-primary-foreground: #f8fbff;
+  --sidebar-accent: #e8f1f8;
+  --sidebar-accent-foreground: #1a2a3a;
+  --sidebar-border: #c9d9e8;
+  --sidebar-ring: #6b8fd4;
+  --sky: #e8f1f8;
+  --mist: #f8fbff;
+  --ink: #1a2a3a;
+  --sand: #f3ebe0;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, #d6e8f8 0%, transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, #e8f0e8 0%, transparent 45%);
+    background-attachment: fixed;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .fade-up {
+    animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .fade-in {
+    animation: fade-in 0.45s ease-out both;
+  }
+  .delay-1 {
+    animation-delay: 0.08s;
+  }
+  .delay-2 {
+    animation-delay: 0.16s;
+  }
+  .delay-3 {
+    animation-delay: 0.24s;
+  }
+  .delay-4 {
+    animation-delay: 0.32s;
+  }
+  .glass {
+    @apply border border-white/60 bg-white/55 shadow-sm backdrop-blur-md;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
