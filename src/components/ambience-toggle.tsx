@@ -2,18 +2,50 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Volume2, VolumeX } from "lucide-react"
-import { loadState, setAmbienceEnabled } from "@/lib/storage"
+import { setAmbienceEnabledAction } from "@/app/actions"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
+import { fetchProfile } from "@/lib/data"
+import { hasEnvVars } from "@/lib/supabase/env"
 
 export function AmbienceToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [enabled, setEnabled] = useState(false)
   const [ready, setReady] = useState(false)
+  const [canPersist, setCanPersist] = useState(false)
 
   useEffect(() => {
-    const state = loadState()
-    setEnabled(state.ambienceEnabled)
-    setReady(true)
+    let cancelled = false
+
+    async function load() {
+      if (!hasEnvVars()) {
+        if (!cancelled) setReady(true)
+        return
+      }
+      try {
+        const supabase = createClient()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (!user) {
+          if (!cancelled) setReady(true)
+          return
+        }
+        const profile = await fetchProfile(supabase)
+        if (!cancelled) {
+          setEnabled(profile?.ambienceEnabled ?? false)
+          setCanPersist(true)
+          setReady(true)
+        }
+      } catch {
+        if (!cancelled) setReady(true)
+      }
+    }
+
+    void load()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -24,19 +56,18 @@ export function AmbienceToggle() {
     audio.loop = true
     if (enabled) {
       void audio.play().catch(() => {
-        // Autoplay blocked until user gesture — toggle stays off visually next click
         setEnabled(false)
-        setAmbienceEnabled(false)
+        if (canPersist) void setAmbienceEnabledAction(false)
       })
     } else {
       audio.pause()
     }
-  }, [enabled, ready])
+  }, [enabled, ready, canPersist])
 
   function toggle() {
     const next = !enabled
     setEnabled(next)
-    setAmbienceEnabled(next)
+    if (canPersist) void setAmbienceEnabledAction(next)
   }
 
   if (!ready) return null

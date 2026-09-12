@@ -1,33 +1,16 @@
-"use client"
-
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { redirect } from "next/navigation"
 import { AppNav } from "@/components/app-nav"
-import { loadState } from "@/lib/storage"
+import { getCachedProfile } from "@/lib/data-server"
+import { profileHasAnswers } from "@/lib/data"
+import { hasEnvVars } from "@/lib/supabase/env"
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
-  const [ok, setOk] = useState(false)
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  if (!hasEnvVars()) redirect("/signup")
 
-  useEffect(() => {
-    const state = loadState()
-    if (!state.profile) {
-      router.replace("/auth")
-      return
-    }
-    if (!state.onboardingComplete) {
-      router.replace(state.answers ? "/preferences" : "/onboarding")
-      return
-    }
-    setOk(true)
-  }, [router])
-
-  if (!ok) {
-    return (
-      <main className="flex flex-1 items-center justify-center p-8 text-muted-foreground">
-        Preparing your cabin…
-      </main>
-    )
+  const profile = await getCachedProfile()
+  if (!profile) redirect("/login")
+  if (!profile.onboardingComplete) {
+    redirect(profileHasAnswers(profile) ? "/preferences" : "/onboarding")
   }
 
   return (

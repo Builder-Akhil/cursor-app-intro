@@ -1,22 +1,14 @@
-"use client"
-
 import Link from "next/link"
 import Image from "next/image"
-import { useEffect, useState } from "react"
 import { BookOpen, Mountain } from "lucide-react"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { loadState } from "@/lib/storage"
-import { CATEGORY_META, unsplashUrl, type Category } from "@/lib/types"
+import { getCachedProfile } from "@/lib/data-server"
+import { CATEGORY_META, unsplashUrl } from "@/lib/types"
 
-export default function AppHomePage() {
-  const [name, setName] = useState("friend")
-  const [category, setCategoryLabel] = useState<Category | null>(null)
-
-  useEffect(() => {
-    const state = loadState()
-    setName(state.profile?.name ?? "friend")
-    setCategoryLabel(state.category)
-  }, [])
+export default async function AppHomePage() {
+  const profile = await getCachedProfile()
+  const name = profile?.name ?? "friend"
+  const category = profile?.category ?? null
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">

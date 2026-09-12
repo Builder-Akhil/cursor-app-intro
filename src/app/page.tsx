@@ -4,25 +4,32 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { BookOpen, LayoutDashboard, Mountain, Sparkles } from "lucide-react"
+import { joinWaitlistAction } from "@/app/actions"
 import { ShinyButton } from "@/components/ui/shiny-button"
 import { Input } from "@/components/ui/input"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { addWaitlistEmail } from "@/lib/storage"
 import { unsplashUrl } from "@/lib/types"
 
 export default function LandingPage() {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "joined" | "already" | "error">("idle")
+  const [message, setMessage] = useState("")
 
-  function joinWaitlist(e: React.FormEvent) {
+  async function joinWaitlist(e: React.FormEvent) {
     e.preventDefault()
     if (!email.trim() || !email.includes("@")) {
       setStatus("error")
+      setMessage("Enter a valid email to join.")
       return
     }
-    const result = addWaitlistEmail(email)
+    const result = await joinWaitlistAction(email)
+    if (!result.ok) {
+      setStatus("error")
+      setMessage(result.error ?? "Enter a valid email to join.")
+      return
+    }
     setStatus(result.already ? "already" : "joined")
-    if (result.ok) setEmail("")
+    if (!result.already) setEmail("")
   }
 
   return (
@@ -47,10 +54,10 @@ export default function LandingPage() {
               <span className="text-lg font-medium tracking-tight">Fable</span>
             </div>
             <Link
-              href="/auth"
+              href="/login"
               className="rounded-full bg-white/15 px-4 py-2 text-sm text-white backdrop-blur transition hover:bg-white/25"
             >
-              Try the demo
+              Sign in
             </Link>
           </div>
 
@@ -70,10 +77,7 @@ export default function LandingPage() {
           </div>
 
           <div className="fade-up delay-4 grid gap-4 md:grid-cols-[1.2fr_auto] md:items-end">
-            <form
-              onSubmit={joinWaitlist}
-              className="glass rounded-3xl p-4 sm:p-5"
-            >
+            <form onSubmit={(e) => void joinWaitlist(e)} className="glass rounded-3xl p-4 sm:p-5">
               <label className="mb-2 block text-sm font-medium text-ink">
                 Join the waitlist
               </label>
@@ -94,22 +98,20 @@ export default function LandingPage() {
                 </ShinyButton>
               </div>
               {status === "joined" && (
-                <p className="mt-3 text-sm text-primary">
-                  You&apos;re on the list. (This demo saves emails on your device only.)
-                </p>
+                <p className="mt-3 text-sm text-primary">You&apos;re on the list. We saved that in the hangar.</p>
               )}
               {status === "already" && (
-                <p className="mt-3 text-sm text-primary">You&apos;re already on this device&apos;s waitlist.</p>
+                <p className="mt-3 text-sm text-primary">You&apos;re already on the waitlist.</p>
               )}
               {status === "error" && (
-                <p className="mt-3 text-sm text-destructive">Enter a valid email to join.</p>
+                <p className="mt-3 text-sm text-destructive">{message || "Enter a valid email to join."}</p>
               )}
             </form>
 
             <div className="flex justify-start md:justify-end">
-              <ShinyButton onClick={() => (window.location.href = "/auth")}>
-                Try the demo
-              </ShinyButton>
+              <Link href="/signup">
+                <ShinyButton>Start your first chapter</ShinyButton>
+              </Link>
             </div>
           </div>
         </div>
@@ -164,9 +166,9 @@ export default function LandingPage() {
               a cabin PA: off by default, yours when you want calm.
             </p>
             <div className="pt-2">
-              <ShinyButton onClick={() => (window.location.href = "/auth")}>
-                Start your first chapter
-              </ShinyButton>
+              <Link href="/signup">
+                <ShinyButton>Try the demo</ShinyButton>
+              </Link>
             </div>
           </div>
         </div>
@@ -174,9 +176,8 @@ export default function LandingPage() {
 
       <footer className="mx-auto max-w-5xl px-4 py-10 text-sm text-muted-foreground">
         <p>
-          Fable demo · Waitlist emails stay on this device (localStorage) — not sent to a
-          server yet. Not therapy or medical advice — just a reflective companion for direction
-          and hope.
+          Fable demo · Waitlist emails go to the Fable hangar (your Supabase project). Not therapy
+          or medical advice — just a reflective companion for direction and hope.
         </p>
       </footer>
     </main>

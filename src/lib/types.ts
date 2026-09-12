@@ -16,6 +16,17 @@ export interface Answers {
   seasonWord: string
 }
 
+export interface AppProfile {
+  id: string
+  name: string
+  email: string
+  answers: Answers | null
+  category: Category | null
+  onboardingComplete: boolean
+  ambienceEnabled: boolean
+  createdAt: string
+}
+
 export interface Entry {
   id: string
   type: EntryType

@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BookOpen, History, LayoutDashboard, Mountain, Sparkles } from "lucide-react"
+import { BookOpen, History, LayoutDashboard, LogOut, Mountain, Sparkles } from "lucide-react"
+import { signOutAction } from "@/app/auth/actions"
 import { cn } from "@/lib/utils"
 
 const links = [
@@ -45,6 +46,15 @@ export function AppNav() {
               </Link>
             )
           })}
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              <LogOut className="size-3.5" />
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
+          </form>
         </nav>
       </div>
     </header>
