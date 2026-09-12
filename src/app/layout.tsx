@@ -1,11 +1,22 @@
 import type { Metadata } from "next"
-import { Inter, Geist_Mono } from "next/font/google"
+import { Bebas_Neue, DM_Sans, Fraunces, Geist_Mono } from "next/font/google"
 import { AmbienceToggle } from "@/components/ambience-toggle"
 import "./globals.css"
 
-const inter = Inter({
-  variable: "--font-sans",
+const display = Bebas_Neue({
+  weight: "400",
   subsets: ["latin"],
+  variable: "--font-display",
+})
+
+const sans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
+
+const serif = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-serif",
 })
 
 const geistMono = Geist_Mono({
@@ -25,7 +36,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${display.variable} ${sans.variable} ${serif.variable} ${geistMono.variable} h-full antialiased`}
+    >
       <body className="relative min-h-full flex flex-col font-sans">
         {children}
         <AmbienceToggle />

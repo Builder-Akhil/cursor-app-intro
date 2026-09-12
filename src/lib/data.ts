@@ -53,8 +53,58 @@ export function mapEntry(row: EntryRow): Entry {
     body: row.body,
     prompt: row.prompt ?? undefined,
     imageUrl: row.image_url ?? undefined,
+    imagePath: row.image_path ?? undefined,
     createdAt: row.created_at,
   }
+}
+
+const VISION_BUCKET = "vision-images"
+const SIGNED_URL_SECONDS = 60 * 60 * 12
+
+export async function withSignedImages(
+  supabase: FableClient,
+  entries: Entry[]
+): Promise<Entry[]> {
+  const paths = entries
+    .map((entry) => entry.imagePath)
+    .filter((path): path is string => Boolean(path))
+  if (!paths.length) return entries
+
+  const { data } = await supabase.storage
+    .from(VISION_BUCKET)
+    .createSignedUrls(paths, SIGNED_URL_SECONDS)
+
+  const signedByPath = new Map<string, string>()
+  for (const item of data ?? []) {
+    if (item.path && item.signedUrl) signedByPath.set(item.path, item.signedUrl)
+  }
+
+  return entries.map((entry) => {
+    const signed = entry.imagePath ? signedByPath.get(entry.imagePath) : undefined
+    return signed ? { ...entry, imageUrl: signed } : entry
+  })
+}
+
+export async function uploadVisionImage(
+  supabase: FableClient,
+  userId: string,
+  bytes: Buffer,
+  contentType: string
+) {
+  const path = `${userId}/${crypto.randomUUID()}.webp`
+  const { error } = await supabase.storage.from(VISION_BUCKET).upload(path, bytes, {
+    contentType,
+    upsert: false,
+  })
+  if (error) {
+    throw new Error("Could not store that poster in the locker.")
+  }
+
+  const { data } = await supabase.storage
+    .from(VISION_BUCKET)
+    .createSignedUrl(path, SIGNED_URL_SECONDS)
+
+  return { path, imageUrl: data?.signedUrl ?? null }
 }
 
 export function snapshotAnswers(answers: Answers | null): Json {
@@ -107,7 +157,7 @@ export async function fetchEntries(supabase: FableClient): Promise<Entry[]> {
     .order("created_at", { ascending: false })
     .limit(HISTORY_LIMIT)
   if (error) throw error
-  return (data ?? []).map(mapEntry)
+  return withSignedImages(supabase, (data ?? []).map(mapEntry))
 }
 
 export function authErrorMessage(message: string) {

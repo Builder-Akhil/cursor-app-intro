@@ -82,7 +82,7 @@ export function AmbienceToggle() {
         onClick={toggle}
         aria-label={enabled ? "Mute ambience" : "Play ambience"}
         title={enabled ? "Mute cabin ambience" : "Optional ambience (off by default)"}
-        className="fixed bottom-4 right-4 z-50 size-11 rounded-full border border-border/80 bg-white/80 shadow-md backdrop-blur"
+        className="fixed bottom-4 right-4 z-50 size-11 rounded-none border-2 border-ink bg-volt text-ink shadow-[4px_4px_0_0_var(--ink)]"
       >
         {enabled ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
       </Button>

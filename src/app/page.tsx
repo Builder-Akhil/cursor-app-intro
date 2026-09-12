@@ -2,13 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
-import { BookOpen, LayoutDashboard, Mountain, Sparkles } from "lucide-react"
+import { BookOpen, LayoutDashboard, Mountain } from "lucide-react"
 import { joinWaitlistAction } from "@/app/actions"
 import { ShinyButton } from "@/components/ui/shiny-button"
 import { Input } from "@/components/ui/input"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { unsplashUrl } from "@/lib/types"
 
 export default function LandingPage() {
   const [email, setEmail] = useState("")
@@ -34,51 +31,48 @@ export default function LandingPage() {
 
   return (
     <main className="flex-1">
-      <section className="relative min-h-[88vh]">
-        <Image
-          src={unsplashUrl("photo-1506905925346-21bda4d32df4", 1800)}
-          alt="Mountain horizon at soft light"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/35 to-background" />
-
-        <div className="relative mx-auto flex max-w-5xl flex-col gap-10 px-4 pb-20 pt-10 sm:pt-16">
+      <section className="relative overflow-hidden bg-ink text-paper">
+        <div className="pointer-events-none absolute -right-16 top-10 rotate-12 font-display text-[28vw] leading-none text-volt/15">
+          GO
+        </div>
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-12 px-4 pb-20 pt-10 sm:pt-14">
           <div className="flex items-center justify-between fade-up">
-            <div className="flex items-center gap-2 text-white">
-              <span className="flex size-9 items-center justify-center rounded-full bg-white/15 text-sm font-medium backdrop-blur">
+            <div className="flex items-center gap-2">
+              <span className="flex size-10 items-center justify-center bg-volt font-display text-lg text-ink">
                 F
               </span>
-              <span className="text-lg font-medium tracking-tight">Fable</span>
+              <span className="font-display text-3xl tracking-wide">FABLE</span>
             </div>
             <Link
               href="/login"
-              className="rounded-full bg-white/15 px-4 py-2 text-sm text-white backdrop-blur transition hover:bg-white/25"
+              className="stamp border-2 border-paper px-4 py-2 text-xs text-paper transition hover:bg-volt hover:text-ink"
             >
               Sign in
             </Link>
           </div>
 
-          <div className="max-w-2xl space-y-6 text-white">
-            <p className="fade-up delay-1 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs tracking-wide uppercase backdrop-blur">
-              <Sparkles className="size-3.5" />
-              For 18–30s seeking direction & hope
+          <div className="max-w-4xl">
+            <p className="fade-up delay-1 stamp inline-block bg-crimson px-3 py-1 text-[11px] text-paper">
+              18–30 · direction · hope
             </p>
-            <h1 className="fade-up delay-2 text-4xl font-medium leading-tight tracking-tight sm:text-5xl md:text-6xl">
-              Answer a few questions. Walk away with your life as a story.
+            <h1 className="fade-up delay-2 display-title mt-5 text-[22vw] sm:text-[9.5rem]">
+              Your life
+              <br />
+              <span className="text-volt">as a story.</span>
             </h1>
-            <p className="fade-up delay-3 max-w-xl text-base text-white/85 sm:text-lg">
-              Fable listens, then reflects who you really are — a reflective story for your
-              pocket, and a hero vision prompt for the person you&apos;re becoming. Fun, but
-              purposeful — like Spider-Man finding his callsign in the skyline.
+            <p className="fade-up delay-3 mt-6 max-w-xl font-serif text-xl leading-relaxed text-paper/85 sm:text-2xl">
+              Answer a few questions. Walk away with a chapter written by Luna,
+              and a hero still printed by Flare. Fun, but purposeful — like
+              Spider-Man finding a callsign in the skyline.
             </p>
           </div>
 
           <div className="fade-up delay-4 grid gap-4 md:grid-cols-[1.2fr_auto] md:items-end">
-            <form onSubmit={(e) => void joinWaitlist(e)} className="glass rounded-3xl p-4 sm:p-5">
-              <label className="mb-2 block text-sm font-medium text-ink">
+            <form
+              onSubmit={(e) => void joinWaitlist(e)}
+              className="border-2 border-volt bg-paper p-4 text-ink sm:p-5"
+            >
+              <label className="stamp mb-2 block text-[11px] text-ink">
                 Join the waitlist
               </label>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -90,21 +84,21 @@ export default function LandingPage() {
                     setEmail(e.target.value)
                     setStatus("idle")
                   }}
-                  className="h-12 rounded-full border-border/70 bg-white/90 px-4"
+                  className="h-12 rounded-none border-2 border-ink bg-paper px-4"
                   aria-label="Email for waitlist"
                 />
                 <ShinyButton type="submit" className="shrink-0 !px-6 !py-3 !text-base">
-                  Join the waitlist
+                  Join the list
                 </ShinyButton>
               </div>
               {status === "joined" && (
-                <p className="mt-3 text-sm text-primary">You&apos;re on the list. We saved that in the hangar.</p>
+                <p className="mt-3 text-sm">You&apos;re on the list. Logged in the hangar.</p>
               )}
               {status === "already" && (
-                <p className="mt-3 text-sm text-primary">You&apos;re already on the waitlist.</p>
+                <p className="mt-3 text-sm">You&apos;re already on the waitlist.</p>
               )}
               {status === "error" && (
-                <p className="mt-3 text-sm text-destructive">{message || "Enter a valid email to join."}</p>
+                <p className="mt-3 text-sm text-crimson">{message || "Enter a valid email to join."}</p>
               )}
             </form>
 
@@ -117,52 +111,62 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 py-20">
-        <div className="mb-10 max-w-2xl fade-up">
-          <h2 className="text-3xl font-medium tracking-tight text-ink">What you get in v0.1</h2>
-          <p className="mt-3 text-muted-foreground">
-            Think of this as a wind-tunnel model of the aircraft: every switch works, the real
-            AI engines come next.
+      <section className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mb-10 flex flex-col gap-3 fade-up md:flex-row md:items-end md:justify-between">
+          <h2 className="display-title text-6xl sm:text-8xl">
+            What you
+            <br />
+            get now
+          </h2>
+          <p className="max-w-sm font-serif text-lg text-ink/80">
+            Real engines in the wings: Luna writes the chapter, Flare prints the
+            poster. Same hangar. Louder paint job.
           </p>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           <FeatureCard
-            icon={<BookOpen className="size-5 text-primary" />}
+            index="01"
+            icon={<BookOpen className="size-5" />}
             title="Story Mode"
             description="A reflective narrative you can take with you — hope, stuck points, and who you're becoming."
             delay="delay-1"
           />
           <FeatureCard
-            icon={<Mountain className="size-5 text-primary" />}
+            index="02"
+            icon={<Mountain className="size-5" />}
             title="Vision Board"
-            description="One hero visual plus a copyable ChatGPT prompt where you are the hero of the frame."
+            description="A real hero still, plus the prompt behind it. You in the frame, not a stock mountain."
             delay="delay-2"
           />
           <FeatureCard
-            icon={<LayoutDashboard className="size-5 text-primary" />}
-            title="Dashboard & History"
-            description="Day stamps, quotes, and a log of everything you've created across modes."
+            index="03"
+            icon={<LayoutDashboard className="size-5" />}
+            title="Board & Log"
+            description="Day stamps, quotes, and every chapter you have filed. One logbook, two modes."
             delay="delay-3"
           />
         </div>
       </section>
 
-      <section className="border-y border-border/60 bg-sky/60">
-        <div className="mx-auto grid max-w-5xl gap-8 px-4 py-16 md:grid-cols-2 md:items-center">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-lg">
-            <Image
-              src={unsplashUrl("photo-1441974231531-c6227db76b6e", 1000)}
-              alt="Forest path through soft light"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
+      <section className="border-y-2 border-ink bg-navy text-paper">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center">
+          <div className="relative aspect-[4/3] overflow-hidden border-2 border-volt bg-ink">
+            <p className="absolute inset-0 flex items-center justify-center font-display text-[22vw] leading-none text-volt/25 md:text-[9rem]">
+              YOU
+            </p>
+            <p className="absolute bottom-4 left-4 right-4 font-serif text-2xl text-paper">
+              Nature as co-pilot. You as the campaign.
+            </p>
           </div>
-          <div className="space-y-4">
-            <h2 className="text-3xl font-medium tracking-tight">Nature as your co-pilot</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              Soft blues, mist, and open landscapes — not decoration for its own sake, but a
-              reminder that seasons have jobs. Optional ambience music sits in the corner like
+          <div className="space-y-5">
+            <p className="stamp text-volt">Field note</p>
+            <h2 className="display-title text-6xl sm:text-7xl">
+              Seasons
+              <br />
+              have jobs.
+            </h2>
+            <p className="font-serif text-lg leading-relaxed text-paper/80">
+              Soft landings still count. Optional ambience sits in the corner like
               a cabin PA: off by default, yours when you want calm.
             </p>
             <div className="pt-2">
@@ -174,10 +178,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="mx-auto max-w-5xl px-4 py-10 text-sm text-muted-foreground">
+      <footer className="mx-auto max-w-6xl px-4 py-10 text-sm text-ink/70">
         <p>
-          Fable demo · Waitlist emails go to the Fable hangar (your Supabase project). Not therapy
-          or medical advice — just a reflective companion for direction and hope.
+          Fable · Waitlist emails go to the hangar. Not therapy or medical advice —
+          a reflective companion for direction and hope.
         </p>
       </footer>
     </main>
@@ -185,25 +189,26 @@ export default function LandingPage() {
 }
 
 function FeatureCard({
+  index,
   icon,
   title,
   description,
   delay,
 }: {
+  index: string
   icon: React.ReactNode
   title: string
   description: string
   delay: string
 }) {
   return (
-    <Card className={`glass fade-up ${delay} border-white/70 shadow-none`}>
-      <CardHeader>
-        <div className="mb-2 flex size-10 items-center justify-center rounded-2xl bg-secondary">
-          {icon}
-        </div>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <CardDescription className="text-base leading-relaxed">{description}</CardDescription>
-      </CardHeader>
-    </Card>
+    <article className={`glass fade-up ${delay} p-5`}>
+      <p className="font-display text-5xl text-crimson">{index}</p>
+      <div className="mt-6 flex size-10 items-center justify-center bg-volt text-ink">
+        {icon}
+      </div>
+      <h3 className="mt-4 font-display text-3xl uppercase tracking-wide">{title}</h3>
+      <p className="mt-2 font-serif text-base leading-relaxed text-ink/75">{description}</p>
+    </article>
   )
 }

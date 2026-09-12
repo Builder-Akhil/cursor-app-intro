@@ -34,6 +34,7 @@ export interface Entry {
   body: string
   prompt?: string
   imageUrl?: string
+  imagePath?: string
   createdAt: string
 }
 

@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCachedEntries, getCachedProfile } from "@/lib/data-server"
 import { QUOTES } from "@/lib/stories"
 
@@ -15,18 +14,19 @@ export default async function DashboardPage() {
   const quoteIndex = new Date().getDate() % QUOTES.length
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10">
-      <div className="mb-8 fade-up">
-        <h1 className="text-3xl font-medium tracking-tight">Dashboard</h1>
-        <p className="mt-2 text-muted-foreground">
-          Your flight log — days flying, stories filed, vision prompts ready.
+    <main className="mx-auto w-full max-w-6xl px-4 py-12">
+      <div className="mb-10 fade-up">
+        <p className="stamp text-xs text-crimson">Scoreboard</p>
+        <h1 className="display-title mt-2 text-7xl sm:text-8xl">Board</h1>
+        <p className="mt-3 font-serif text-xl text-ink/75">
+          Days flying, stories filed, posters ready.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Days with Fable" value={String(dayCount)} delay="delay-1" />
         <StatCard label="Stories" value={String(stories)} delay="delay-2" />
-        <StatCard label="Vision prompts" value={String(visions)} delay="delay-3" />
+        <StatCard label="Vision stills" value={String(visions)} delay="delay-3" />
         <StatCard
           label="Last created"
           value={
@@ -41,18 +41,18 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Card className="glass mt-6 fade-up border-white/70 shadow-none">
-        <CardHeader>
-          <CardTitle className="text-lg">Today&apos;s quote</CardTitle>
-          <CardDescription>A soft heading for the day.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-xl leading-relaxed text-ink">&ldquo;{QUOTES[quoteIndex]}&rdquo;</p>
-          <Link href="/app/history" className="mt-6 inline-block text-sm text-primary hover:underline">
-            Open full history →
-          </Link>
-        </CardContent>
-      </Card>
+      <article className="glass mt-8 fade-up p-6">
+        <p className="stamp text-[11px] text-crimson">Today&apos;s quote</p>
+        <p className="mt-4 font-serif text-3xl leading-snug text-ink">
+          &ldquo;{QUOTES[quoteIndex]}&rdquo;
+        </p>
+        <Link
+          href="/app/history"
+          className="mt-6 inline-block font-display text-lg uppercase tracking-wide text-ink underline decoration-volt decoration-4 underline-offset-4"
+        >
+          Open full log →
+        </Link>
+      </article>
     </main>
   )
 }
@@ -67,11 +67,9 @@ function StatCard({
   delay: string
 }) {
   return (
-    <Card className={`glass fade-up ${delay} border-white/70 shadow-none`}>
-      <CardHeader className="pb-2">
-        <CardDescription>{label}</CardDescription>
-        <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
-      </CardHeader>
-    </Card>
+    <article className={`glass fade-up ${delay} p-5`}>
+      <p className="stamp text-[11px] text-ink/60">{label}</p>
+      <p className="display-title mt-3 text-6xl">{value}</p>
+    </article>
   )
 }

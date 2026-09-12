@@ -3,7 +3,6 @@
 import { useState } from "react"
 import Image from "next/image"
 import { BookOpen, Mountain } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import type { Entry } from "@/lib/types"
 
@@ -12,23 +11,22 @@ export function HistoryList({ entries }: { entries: Entry[] }) {
   const open = entries.find((e) => e.id === openId) ?? null
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10">
-      <div className="mb-8 fade-up">
-        <h1 className="text-3xl font-medium tracking-tight">History</h1>
-        <p className="mt-2 text-muted-foreground">
-          Everything you&apos;ve done across Story Mode and Vision Board — newest first.
+    <main className="mx-auto w-full max-w-4xl px-4 py-12">
+      <div className="mb-10 fade-up">
+        <p className="stamp text-xs text-crimson">Archive</p>
+        <h1 className="display-title mt-2 text-7xl sm:text-8xl">Log</h1>
+        <p className="mt-3 font-serif text-xl text-ink/75">
+          Everything you have filed — newest first.
         </p>
       </div>
 
       {entries.length === 0 ? (
-        <Card className="glass border-white/70 shadow-none">
-          <CardHeader>
-            <CardTitle>No entries yet</CardTitle>
-            <CardDescription>
-              Generate a story or hero prompt and it will land here like a stamped logbook page.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <article className="glass p-6">
+          <h2 className="font-display text-3xl uppercase">No entries yet</h2>
+          <p className="mt-2 font-serif text-ink/70">
+            Generate a story or hero still and it lands here like a stamped logbook page.
+          </p>
+        </article>
       ) : (
         <div className="space-y-3">
           {entries.map((entry, i) => (
@@ -48,61 +46,65 @@ export function HistoryList({ entries }: { entries: Entry[] }) {
                         : ""
               }`}
             >
-              <Card className="border-white/70 shadow-none glass transition hover:bg-white/70">
-                <CardHeader className="flex-row items-start gap-3 space-y-0">
-                  <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
-                    {entry.type === "story" ? (
-                      <BookOpen className="size-4" />
-                    ) : (
-                      <Mountain className="size-4" />
-                    )}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="truncate text-base">{entry.title}</CardTitle>
-                    <CardDescription>
-                      {entry.type === "story" ? "Story" : "Vision"} ·{" "}
-                      {new Date(entry.createdAt).toLocaleString()}
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-              </Card>
+              <article className="glass flex items-start gap-4 p-4 transition hover:-translate-y-0.5">
+                <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center bg-volt text-ink">
+                  {entry.type === "story" ? (
+                    <BookOpen className="size-4" />
+                  ) : (
+                    <Mountain className="size-4" />
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate font-display text-2xl uppercase tracking-wide">
+                    {entry.title}
+                  </h2>
+                  <p className="stamp mt-1 text-[11px] text-ink/60">
+                    {entry.type === "story" ? "Story" : "Vision"} ·{" "}
+                    {new Date(entry.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              </article>
             </button>
           ))}
         </div>
       )}
 
       {open && (
-        <Card className="glass mt-6 fade-in border-white/70 shadow-none">
-          <CardHeader>
-            <CardTitle>{open.title}</CardTitle>
-            <CardDescription>
-              {open.type === "story" ? "Story" : "Vision"} ·{" "}
-              {new Date(open.createdAt).toLocaleString()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <article className="glass mt-6 fade-in p-6">
+          <p className="stamp text-[11px] text-crimson">
+            {open.type === "story" ? "Story" : "Vision"} ·{" "}
+            {new Date(open.createdAt).toLocaleString()}
+          </p>
+          <h2 className="display-title mt-2 text-5xl">{open.title}</h2>
+          <div className="mt-5 space-y-4">
             {open.imageUrl && (
-              <div className="relative aspect-video overflow-hidden rounded-2xl">
+              <div className="relative aspect-video overflow-hidden border-2 border-ink">
                 <Image
                   src={open.imageUrl}
                   alt=""
                   fill
+                  unoptimized
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 768px"
                 />
               </div>
             )}
-            <p className="whitespace-pre-wrap leading-relaxed">{open.body}</p>
+            <p className="whitespace-pre-wrap font-serif text-lg leading-relaxed">{open.body}</p>
             {open.prompt && (
-              <pre className="whitespace-pre-wrap rounded-2xl bg-secondary/80 p-4 text-sm">
+              <pre className="whitespace-pre-wrap border-2 border-ink bg-paper p-4 font-serif text-sm">
                 {open.prompt}
               </pre>
             )}
-            <Button type="button" variant="ghost" onClick={() => setOpenId(null)}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-none"
+              onClick={() => setOpenId(null)}
+            >
               Close
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </article>
       )}
     </main>
   )

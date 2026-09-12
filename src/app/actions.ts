@@ -1,10 +1,22 @@
 "use server"
 
-import { authErrorMessage, isCategory, mapEntry, snapshotAnswers, TEMPLATE_MODEL } from "@/lib/data"
+import {
+  authErrorMessage,
+  isCategory,
+  mapEntry,
+  snapshotAnswers,
+  uploadVisionImage,
+} from "@/lib/data"
 import { requireProfile, requireUser } from "@/lib/data-server"
 import { createClient } from "@/lib/supabase/server"
 import { hasEnvVars } from "@/lib/supabase/env"
-import { generateStory, generateVisionPrompt } from "@/lib/stories"
+import {
+  generateStoryWithLuna,
+  generateVisionImageWithFlare,
+  writeVisionPromptWithLuna,
+  STORY_MODEL,
+  VISION_IMAGE_MODEL,
+} from "@/lib/openai"
 import { EMPTY_ANSWERS, type Answers, type Category, type Entry } from "@/lib/types"
 
 export async function joinWaitlistAction(
@@ -102,19 +114,19 @@ export async function createStoryAction(
       })
       .eq("id", user.id)
 
-    const generated = generateStory(profile.name, answers, category)
+    const generated = await generateStoryWithLuna(profile.name, answers, category)
     const { data, error } = await supabase
       .from("entries")
       .insert({
         user_id: user.id,
         type: "story",
         status: "ready",
-        source: "template",
+        source: "ai",
         title: generated.title,
         body: generated.body,
         answers_snapshot: snapshotAnswers(answers),
         category_snapshot: category,
-        model: TEMPLATE_MODEL,
+        model: generated.model || STORY_MODEL,
       })
       .select("*")
       .single()
@@ -133,21 +145,29 @@ export async function createVisionAction(): Promise<{ entry?: Entry; error?: str
     const { supabase, user, profile } = await requireProfile()
     const category = profile.category ?? "seeker"
     const answers = profile.answers ?? EMPTY_ANSWERS
-    const generated = generateVisionPrompt(profile.name, answers, category)
+    const brief = await writeVisionPromptWithLuna(profile.name, answers, category)
+    const image = await generateVisionImageWithFlare(brief.prompt)
+    const stored = await uploadVisionImage(
+      supabase,
+      user.id,
+      image.bytes,
+      image.contentType
+    )
     const { data, error } = await supabase
       .from("entries")
       .insert({
         user_id: user.id,
         type: "vision",
         status: "ready",
-        source: "template",
-        title: generated.title,
-        body: generated.body,
-        prompt: generated.prompt,
-        image_url: generated.imageUrl,
+        source: "ai",
+        title: brief.title,
+        body: brief.body,
+        prompt: brief.prompt,
+        image_url: stored.imageUrl,
+        image_path: stored.path,
         answers_snapshot: snapshotAnswers(answers),
         category_snapshot: category,
-        model: TEMPLATE_MODEL,
+        model: `${VISION_IMAGE_MODEL}+${STORY_MODEL}`,
       })
       .select("*")
       .single()

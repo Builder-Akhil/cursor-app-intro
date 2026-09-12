@@ -1,9 +1,7 @@
 import Link from "next/link"
-import Image from "next/image"
 import { BookOpen, Mountain } from "lucide-react"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCachedProfile } from "@/lib/data-server"
-import { CATEGORY_META, unsplashUrl } from "@/lib/types"
+import { CATEGORY_META } from "@/lib/types"
 
 export default async function AppHomePage() {
   const profile = await getCachedProfile()
@@ -11,15 +9,17 @@ export default async function AppHomePage() {
   const category = profile?.category ?? null
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10">
-      <div className="mb-10 fade-up">
-        <p className="text-sm uppercase tracking-wide text-muted-foreground">Welcome aboard</p>
-        <h1 className="mt-1 text-3xl font-medium tracking-tight sm:text-4xl">
-          Hello, {name}. Pick a mode.
+    <main className="mx-auto w-full max-w-6xl px-4 py-12">
+      <div className="mb-12 fade-up">
+        <p className="stamp text-xs text-crimson">Welcome aboard</p>
+        <h1 className="display-title mt-2 text-7xl sm:text-8xl">
+          Hello,
+          <br />
+          <span className="text-navy">{name}.</span>
         </h1>
         {category && (
-          <p className="mt-2 text-muted-foreground">
-            Flying as <span className="text-foreground">{CATEGORY_META[category].label}</span> —{" "}
+          <p className="mt-4 max-w-xl font-serif text-xl text-ink/75">
+            Flying as <span className="text-ink">{CATEGORY_META[category].label}</span> —{" "}
             {CATEGORY_META[category].blurb}
           </p>
         )}
@@ -28,17 +28,17 @@ export default async function AppHomePage() {
       <div className="grid gap-5 md:grid-cols-2">
         <ModeCard
           href="/app/story"
+          index="01"
           title="Story Mode"
-          description="A reflective story you can take away — hope, stuckness, and aspirational forward motion."
-          imageId="photo-1470071459604-3b5ec3a7fe05"
+          description="Luna writes a reflective chapter from your answers — hope, stuckness, forward motion."
           icon={<BookOpen className="size-5" />}
           className="fade-up delay-1"
         />
         <ModeCard
           href="/app/vision"
+          index="02"
           title="Vision Board"
-          description="One hero visual plus a ChatGPT prompt where you are the hero of the frame."
-          imageId="photo-1506905925346-21bda4d32df4"
+          description="Flare prints a hero still of you. Campaign energy, nature as the set."
           icon={<Mountain className="size-5" />}
           className="fade-up delay-2"
         />
@@ -49,41 +49,31 @@ export default async function AppHomePage() {
 
 function ModeCard({
   href,
+  index,
   title,
   description,
-  imageId,
   icon,
   className,
 }: {
   href: string
+  index: string
   title: string
   description: string
-  imageId: string
   icon: React.ReactNode
   className?: string
 }) {
   return (
     <Link href={href} className={className}>
-      <Card className="group overflow-hidden border-white/70 shadow-none glass transition hover:-translate-y-0.5 hover:shadow-md">
-        <div className="relative h-44">
-          <Image
-            src={unsplashUrl(imageId, 900)}
-            alt=""
-            fill
-            className="object-cover transition duration-500 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/50 to-transparent" />
-          <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-sm text-ink">
+      <article className="group glass min-h-[280px] p-6 transition hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_0_var(--ink)]">
+        <div className="flex items-start justify-between">
+          <span className="font-display text-6xl text-crimson">{index}</span>
+          <span className="flex size-10 items-center justify-center bg-volt text-ink">
             {icon}
-            {title}
-          </div>
+          </span>
         </div>
-        <CardHeader>
-          <CardTitle className="text-xl">{title}</CardTitle>
-          <CardDescription className="text-base leading-relaxed">{description}</CardDescription>
-        </CardHeader>
-      </Card>
+        <h2 className="mt-10 font-display text-5xl uppercase tracking-wide">{title}</h2>
+        <p className="mt-3 font-serif text-lg leading-relaxed text-ink/75">{description}</p>
+      </article>
     </Link>
   )
 }

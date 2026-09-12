@@ -10,21 +10,21 @@ const links = [
   { href: "/app", label: "Home", icon: Sparkles },
   { href: "/app/story", label: "Story", icon: BookOpen },
   { href: "/app/vision", label: "Vision", icon: Mountain },
-  { href: "/app/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/app/history", label: "History", icon: History },
+  { href: "/app/dashboard", label: "Board", icon: LayoutDashboard },
+  { href: "/app/history", label: "Log", icon: History },
 ]
 
 export function AppNav() {
   const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-mist/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/app" className="flex items-center gap-2 font-medium tracking-tight text-ink">
-          <span className="flex size-8 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground">
+    <header className="sticky top-0 z-40 border-b-2 border-ink bg-ink text-paper">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+        <Link href="/app" className="flex items-center gap-2 text-paper">
+          <span className="flex size-9 items-center justify-center bg-volt text-sm font-display text-ink">
             F
           </span>
-          <span>Fable</span>
+          <span className="font-display text-2xl tracking-wide">FABLE</span>
         </Link>
         <nav className="flex flex-wrap items-center justify-end gap-1">
           {links.map(({ href, label, icon: Icon }) => {
@@ -35,10 +35,10 @@ export function AppNav() {
                 key={href}
                 href={href}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-display tracking-[0.16em] uppercase transition-colors",
                   active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    ? "bg-volt text-ink"
+                    : "text-paper/75 hover:bg-paper/10 hover:text-paper"
                 )}
               >
                 <Icon className="size-3.5" />
@@ -49,10 +49,10 @@ export function AppNav() {
           <form action={signOutAction}>
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-display tracking-[0.16em] uppercase text-paper/75 transition-colors hover:bg-crimson hover:text-paper"
             >
               <LogOut className="size-3.5" />
-              <span className="hidden sm:inline">Sign out</span>
+              <span className="hidden sm:inline">Out</span>
             </button>
           </form>
         </nav>

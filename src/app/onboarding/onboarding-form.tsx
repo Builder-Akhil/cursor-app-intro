@@ -91,8 +91,8 @@ export function OnboardingForm({ initialAnswers }: { initialAnswers: Answers }) 
 
       <Card className="glass fade-in border-white/70 shadow-none">
         <CardHeader>
-          <CardTitle className="text-2xl tracking-tight">{q.title}</CardTitle>
-          <CardDescription className="text-base">{q.hint}</CardDescription>
+          <CardTitle className="font-display text-4xl uppercase tracking-wide">{q.title}</CardTitle>
+          <CardDescription className="font-serif text-base">{q.hint}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <Textarea

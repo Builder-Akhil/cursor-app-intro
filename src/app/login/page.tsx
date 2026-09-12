@@ -13,6 +13,7 @@ import { hasEnvVars } from "@/lib/supabase/env"
 export default function LoginPage() {
   const searchParams = useSearchParams()
   const next = searchParams.get("next") ?? "/app"
+  const confirmed = searchParams.get("confirmed") === "1"
   const [error, setError] = useState("")
   const [pending, setPending] = useState(false)
 
@@ -30,9 +31,11 @@ export default function LoginPage() {
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 py-16">
       <Card className="glass fade-up border-white/70 shadow-none">
         <CardHeader>
-          <CardTitle className="text-2xl tracking-tight">Sign in to Fable</CardTitle>
-          <CardDescription className="text-base">
-            Returning pilot — same hangar, same logbook, wherever you land.
+          <CardTitle className="font-display text-4xl uppercase tracking-wide">Sign in to Fable</CardTitle>
+          <CardDescription className="font-serif text-base">
+            {confirmed
+              ? "Email confirmed — sign in with the same password to enter the cockpit."
+              : "Returning pilot — same hangar, same logbook, wherever you land."}
           </CardDescription>
         </CardHeader>
         <CardContent>

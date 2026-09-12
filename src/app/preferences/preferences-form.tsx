@@ -33,8 +33,8 @@ export function PreferencesForm({ initialCategory }: { initialCategory: Category
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12">
       <div className="mb-8 fade-up">
-        <h1 className="text-3xl font-medium tracking-tight">How should Fable see you?</h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">
+        <h1 className="display-title text-6xl sm:text-7xl">How should Fable see you?</h1>
+        <p className="mt-3 max-w-xl font-serif text-lg text-ink/75">
           We suggested a category from your answers — like choosing your callsign. Pick the one
           that feels true; it steers story tone and your hero visual.
         </p>
