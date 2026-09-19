@@ -3,9 +3,14 @@
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { authErrorMessage } from "@/lib/data"
+import { queueN8nSignup } from "@/lib/n8n"
 import { safeInternalPath, siteOrigin } from "@/lib/paths"
 import { createClient } from "@/lib/supabase/server"
 import { hasEnvVars } from "@/lib/supabase/env"
+
+function isLikelyExistingSignupUser(user: { identities?: unknown[] } | null) {
+  return Boolean(user) && (user?.identities?.length ?? 0) === 0
+}
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase()
@@ -43,11 +48,24 @@ export async function signupAction(formData: FormData) {
   })
 
   if (error) return { error: authErrorMessage(error.message) }
+  if (!isLikelyExistingSignupUser(data.user)) {
+    queueN8nSignup({ name, email })
+  }
   if (!data.session) {
     redirect("/signup?checkEmail=1")
   }
 
   redirect("/onboarding")
+}
+
+export async function notifySignupWebhookAction(input: {
+  name: string
+  email: string
+}) {
+  queueN8nSignup({
+    name: String(input.name ?? ""),
+    email: String(input.email ?? ""),
+  })
 }
 
 export async function loginAction(formData: FormData) {

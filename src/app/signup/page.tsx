@@ -2,28 +2,118 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { signupAction } from "@/app/auth/actions"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ShinyButton } from "@/components/ui/shiny-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { notifySignupWebhookAction } from "@/app/auth/actions"
+import { authErrorMessage } from "@/lib/data"
+import { createClient } from "@/lib/supabase/client"
 import { hasEnvVars } from "@/lib/supabase/env"
 
 export default function SignupPage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const checkEmail = searchParams.get("checkEmail") === "1"
+  const [checkEmail, setCheckEmail] = useState(searchParams.get("checkEmail") === "1")
+  const [emailForResend, setEmailForResend] = useState("")
   const [error, setError] = useState("")
   const [pending, setPending] = useState(false)
 
   async function onSubmit(formData: FormData) {
     setError("")
     setPending(true)
-    const result = await signupAction(formData)
-    if (result?.error) {
-      setError(result.error)
+
+    const name = String(formData.get("name") ?? "").trim()
+    const email = String(formData.get("email") ?? "").trim().toLowerCase()
+    const password = String(formData.get("password") ?? "")
+    const confirm = String(formData.get("confirm") ?? "")
+
+    if (!name) {
+      setError("Add your name so the logbook knows who is flying.")
       setPending(false)
+      return
     }
+    if (!email.includes("@")) {
+      setError("Use a real email so we can find your hangar later.")
+      setPending(false)
+      return
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.")
+      setPending(false)
+      return
+    }
+    if (password !== confirm) {
+      setError("Those two passwords do not match.")
+      setPending(false)
+      return
+    }
+
+    const supabase = createClient()
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name },
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+      },
+    })
+
+    if (signUpError) {
+      const already =
+        signUpError.message.toLowerCase().includes("already registered") ||
+        signUpError.message.toLowerCase().includes("already been registered")
+      if (already) {
+        setEmailForResend(email)
+        setCheckEmail(true)
+        setError("That hangar already exists. Resend the confirmation if you have not cleared in yet.")
+        setPending(false)
+        return
+      }
+      setError(authErrorMessage(signUpError.message))
+      setPending(false)
+      return
+    }
+
+    const likelyExisting =
+      Boolean(data.user) && (data.user?.identities?.length ?? 0) === 0
+    if (!likelyExisting) {
+      try {
+        await notifySignupWebhookAction({ name, email })
+      } catch {
+        // Radio to n8n can fail; hangar doors still open.
+      }
+    }
+
+    if (!data.session) {
+      setEmailForResend(email)
+      setCheckEmail(true)
+      setPending(false)
+      return
+    }
+
+    router.push("/onboarding")
+    router.refresh()
+  }
+
+  async function resendConfirmation() {
+    if (!emailForResend.includes("@")) {
+      setError("Add the same email you used to create the hangar.")
+      return
+    }
+    setPending(true)
+    setError("")
+    const supabase = createClient()
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: emailForResend,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/confirm`,
+      },
+    })
+    setPending(false)
+    if (resendError) setError(authErrorMessage(resendError.message))
   }
 
   if (checkEmail) {
@@ -31,12 +121,33 @@ export default function SignupPage() {
       <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 py-16">
         <Card className="glass fade-up border-white/70 shadow-none">
           <CardHeader>
-            <CardTitle className="text-2xl tracking-tight">Check your inbox</CardTitle>
+            <CardTitle className="font-display text-4xl uppercase tracking-wide">Check your inbox</CardTitle>
             <CardDescription className="text-base">
               Holding pattern — confirm the email we sent, then you can taxi to onboarding.
+              Open that link in this same browser.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="resend-email">Email</Label>
+              <Input
+                id="resend-email"
+                type="email"
+                value={emailForResend}
+                onChange={(e) => setEmailForResend(e.target.value)}
+                placeholder="peter@dailybugle.demo"
+                className="h-11 rounded-xl bg-white/80"
+              />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <ShinyButton
+              type="button"
+              disabled={pending}
+              onClick={() => void resendConfirmation()}
+              className="w-full !px-6"
+            >
+              {pending ? "Sending…" : "Resend confirmation"}
+            </ShinyButton>
             <Link href="/login" className="text-sm text-primary hover:underline">
               Already confirmed? Sign in
             </Link>
@@ -50,7 +161,7 @@ export default function SignupPage() {
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 py-16">
       <Card className="glass fade-up border-white/70 shadow-none">
         <CardHeader>
-          <CardTitle className="text-2xl tracking-tight">Create your Fable hangar</CardTitle>
+          <CardTitle className="font-display text-4xl uppercase tracking-wide">Create your Fable hangar</CardTitle>
           <CardDescription className="text-base">
             Email and a password — this is a real badge, not the guest book.
           </CardDescription>
