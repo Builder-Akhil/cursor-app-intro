@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { loginAction } from "@/app/auth/actions"
+import { HangarUnreachableBanner } from "@/components/hangar-status"
 import { ShinyButton } from "@/components/ui/shiny-button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -45,6 +46,7 @@ export default function LoginPage() {
               <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> to <code>.env.local</code>.
             </p>
           )}
+          <HangarUnreachableBanner />
           <form action={onSubmit} className="space-y-5">
             <input type="hidden" name="next" value={next} />
             <div className="space-y-2">

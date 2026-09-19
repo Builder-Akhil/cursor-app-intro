@@ -174,6 +174,15 @@ export function authErrorMessage(message: string) {
   if (text.includes("rate") || text.includes("too many")) {
     return "Too many attempts. Give the engines a minute, then try again."
   }
+  if (
+    text.includes("fetch failed") ||
+    text.includes("failed to fetch") ||
+    text.includes("network") ||
+    text.includes("enotfound") ||
+    text.includes("name_not_resolved")
+  ) {
+    return "Tower is not answering. Fable cannot reach the hangar in NEXT_PUBLIC_SUPABASE_URL — check that project is live, then restart."
+  }
   if (text.includes("email")) {
     return "Use a real email so we can find your hangar later."
   }

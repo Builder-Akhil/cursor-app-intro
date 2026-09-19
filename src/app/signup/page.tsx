@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { notifySignupWebhookAction } from "@/app/auth/actions"
+import { HangarUnreachableBanner } from "@/components/hangar-status"
 import { authErrorMessage } from "@/lib/data"
 import { createClient } from "@/lib/supabase/client"
 import { hasEnvVars } from "@/lib/supabase/env"
@@ -24,77 +25,83 @@ export default function SignupPage() {
     setError("")
     setPending(true)
 
-    const name = String(formData.get("name") ?? "").trim()
-    const email = String(formData.get("email") ?? "").trim().toLowerCase()
-    const password = String(formData.get("password") ?? "")
-    const confirm = String(formData.get("confirm") ?? "")
+    try {
+      const name = String(formData.get("name") ?? "").trim()
+      const email = String(formData.get("email") ?? "").trim().toLowerCase()
+      const password = String(formData.get("password") ?? "")
+      const confirm = String(formData.get("confirm") ?? "")
 
-    if (!name) {
-      setError("Add your name so the logbook knows who is flying.")
-      setPending(false)
-      return
-    }
-    if (!email.includes("@")) {
-      setError("Use a real email so we can find your hangar later.")
-      setPending(false)
-      return
-    }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.")
-      setPending(false)
-      return
-    }
-    if (password !== confirm) {
-      setError("Those two passwords do not match.")
-      setPending(false)
-      return
-    }
-
-    const supabase = createClient()
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
-      },
-    })
-
-    if (signUpError) {
-      const already =
-        signUpError.message.toLowerCase().includes("already registered") ||
-        signUpError.message.toLowerCase().includes("already been registered")
-      if (already) {
-        setEmailForResend(email)
-        setCheckEmail(true)
-        setError("That hangar already exists. Resend the confirmation if you have not cleared in yet.")
+      if (!name) {
+        setError("Add your name so the logbook knows who is flying.")
         setPending(false)
         return
       }
-      setError(authErrorMessage(signUpError.message))
-      setPending(false)
-      return
-    }
-
-    const likelyExisting =
-      Boolean(data.user) && (data.user?.identities?.length ?? 0) === 0
-    if (!likelyExisting) {
-      try {
-        await notifySignupWebhookAction({ name, email })
-      } catch {
-        // Radio to n8n can fail; hangar doors still open.
+      if (!email.includes("@")) {
+        setError("Use a real email so we can find your hangar later.")
+        setPending(false)
+        return
       }
-    }
+      if (password.length < 8) {
+        setError("Password must be at least 8 characters.")
+        setPending(false)
+        return
+      }
+      if (password !== confirm) {
+        setError("Those two passwords do not match.")
+        setPending(false)
+        return
+      }
 
-    if (!data.session) {
-      setEmailForResend(email)
-      setCheckEmail(true)
+      const supabase = createClient()
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+        },
+      })
+
+      if (signUpError) {
+        const already =
+          signUpError.message.toLowerCase().includes("already registered") ||
+          signUpError.message.toLowerCase().includes("already been registered")
+        if (already) {
+          setEmailForResend(email)
+          setCheckEmail(true)
+          setError("That hangar already exists. Resend the confirmation if you have not cleared in yet.")
+          setPending(false)
+          return
+        }
+        setError(authErrorMessage(signUpError.message))
+        setPending(false)
+        return
+      }
+
+      const likelyExisting =
+        Boolean(data.user) && (data.user?.identities?.length ?? 0) === 0
+      if (!likelyExisting) {
+        try {
+          await notifySignupWebhookAction({ name, email })
+        } catch {
+          // Radio to n8n can fail; hangar doors still open.
+        }
+      }
+
+      if (!data.session) {
+        setEmailForResend(email)
+        setCheckEmail(true)
+        setPending(false)
+        return
+      }
+
+      router.push("/onboarding")
+      router.refresh()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "fetch failed"
+      setError(authErrorMessage(message))
       setPending(false)
-      return
     }
-
-    router.push("/onboarding")
-    router.refresh()
   }
 
   async function resendConfirmation() {
@@ -173,6 +180,7 @@ export default function SignupPage() {
               <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> to <code>.env.local</code>.
             </p>
           )}
+          <HangarUnreachableBanner />
           <form action={onSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>

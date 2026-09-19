@@ -44,5 +44,13 @@ export function queueN8nSignup(payload: SignupPayload) {
   if (!name || !email.includes("@")) return
   if (!webhookUrl()) return
 
-  after(() => notifyN8nSignup({ name, email }))
+  const run = () => {
+    void notifyN8nSignup({ name, email })
+  }
+
+  try {
+    after(run)
+  } catch {
+    run()
+  }
 }
