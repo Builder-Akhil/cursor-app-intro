@@ -53,7 +53,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthPath(pathname)) {
+  // Server Actions POST back to the page they were called from. Signup calls one
+  // right after the session cookies land, so redirecting here would swallow the
+  // action response and the caller would see "unexpected response from the server".
+  const isServerAction =
+    request.method !== "GET" || request.headers.has("next-action")
+
+  if (user && isAuthPath(pathname) && !isServerAction) {
     const url = request.nextUrl.clone()
     url.pathname = "/app"
     url.search = ""

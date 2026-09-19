@@ -1,17 +1,27 @@
 import Link from "next/link"
+import { connection } from "next/server"
 import { getCachedEntries, getCachedProfile } from "@/lib/data-server"
 import { QUOTES } from "@/lib/stories"
 
+async function requestClock() {
+  await connection()
+  return Date.now()
+}
+
+function daysFlying(createdAt: string | undefined, nowMs: number) {
+  if (!createdAt) return 1
+  const created = new Date(createdAt).getTime()
+  return Math.max(1, Math.ceil((nowMs - created) / (1000 * 60 * 60 * 24)))
+}
+
 export default async function DashboardPage() {
+  const now = await requestClock()
   const [profile, entries] = await Promise.all([getCachedProfile(), getCachedEntries()])
   const stories = entries.filter((e) => e.type === "story").length
   const visions = entries.filter((e) => e.type === "vision").length
   const last = entries[0]
-  const created = profile?.createdAt ? new Date(profile.createdAt) : null
-  const dayCount = created
-    ? Math.max(1, Math.ceil((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24)))
-    : 1
-  const quoteIndex = new Date().getDate() % QUOTES.length
+  const dayCount = daysFlying(profile?.createdAt, now)
+  const quoteIndex = new Date(now).getDate() % QUOTES.length
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-12">

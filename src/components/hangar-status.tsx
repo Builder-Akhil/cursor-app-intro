@@ -7,9 +7,14 @@ export function HangarUnreachableBanner() {
 
   useEffect(() => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "")
-    if (!url) return
+    const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    if (!url || !key) return
 
-    fetch(`${url}/auth/v1/health`, { cache: "no-store" })
+    // GoTrue answers 401 without the apikey header, which is not an outage.
+    fetch(`${url}/auth/v1/health`, {
+      cache: "no-store",
+      headers: { apikey: key },
+    })
       .then((response) => {
         if (!response.ok) setDown(true)
       })
