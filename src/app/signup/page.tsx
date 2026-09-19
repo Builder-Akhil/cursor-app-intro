@@ -65,15 +65,35 @@ export default function SignupPage() {
       if (signUpError) {
         const already =
           signUpError.message.toLowerCase().includes("already registered") ||
-          signUpError.message.toLowerCase().includes("already been registered")
+          signUpError.message.toLowerCase().includes("already been registered") ||
+          (signUpError as { code?: string }).code === "user_already_exists"
         if (already) {
+          const { data: signedIn, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+          if (!signInError && signedIn.session) {
+            try {
+              await notifySignupWebhookAction({ name, email })
+            } catch {
+              // Radio can fail; hangar doors still open.
+            }
+            router.push("/onboarding")
+            router.refresh()
+            return
+          }
           setEmailForResend(email)
           setCheckEmail(true)
           setError("That hangar already exists. Resend the confirmation if you have not cleared in yet.")
           setPending(false)
           return
         }
-        setError(authErrorMessage(signUpError.message))
+        setError(
+          authErrorMessage(
+            signUpError.message,
+            (signUpError as { code?: string }).code
+          )
+        )
         setPending(false)
         return
       }
@@ -84,7 +104,7 @@ export default function SignupPage() {
         try {
           await notifySignupWebhookAction({ name, email })
         } catch {
-          // Radio to n8n can fail; hangar doors still open.
+          // Radio can fail; hangar doors still open.
         }
       }
 
@@ -120,7 +140,11 @@ export default function SignupPage() {
       },
     })
     setPending(false)
-    if (resendError) setError(authErrorMessage(resendError.message))
+    if (resendError) {
+      setError(
+        authErrorMessage(resendError.message, (resendError as { code?: string }).code)
+      )
+    }
   }
 
   if (checkEmail) {

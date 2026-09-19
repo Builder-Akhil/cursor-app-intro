@@ -160,8 +160,9 @@ export async function fetchEntries(supabase: FableClient): Promise<Entry[]> {
   return withSignedImages(supabase, (data ?? []).map(mapEntry))
 }
 
-export function authErrorMessage(message: string) {
+export function authErrorMessage(message: string, code?: string | null) {
   const text = message.toLowerCase()
+  const errorCode = (code ?? "").toLowerCase()
   if (text.includes("invalid login") || text.includes("invalid credentials")) {
     return "Those call signs do not match. Check email and password."
   }
@@ -170,6 +171,12 @@ export function authErrorMessage(message: string) {
   }
   if (text.includes("password should be") || text.includes("password is known")) {
     return "Choose a stronger password — at least 8 characters."
+  }
+  if (
+    errorCode === "over_email_send_rate_limit" ||
+    text.includes("email rate limit")
+  ) {
+    return "The hangar mailroom is capped at 2 confirmation letters an hour. In Supabase: Authentication → Providers → Email → turn Confirm email OFF. n8n already sends the welcome radio."
   }
   if (text.includes("rate") || text.includes("too many")) {
     return "Too many attempts. Give the engines a minute, then try again."

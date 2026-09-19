@@ -47,9 +47,9 @@ export async function signupAction(formData: FormData) {
     },
   })
 
-  if (error) return { error: authErrorMessage(error.message) }
+  if (error) return { error: authErrorMessage(error.message, error.code) }
   if (!isLikelyExistingSignupUser(data.user)) {
-    queueN8nSignup({ name, email })
+    await queueN8nSignup({ name, email })
   }
   if (!data.session) {
     redirect("/signup?checkEmail=1")
@@ -62,10 +62,15 @@ export async function notifySignupWebhookAction(input: {
   name: string
   email: string
 }) {
-  queueN8nSignup({
-    name: String(input.name ?? ""),
-    email: String(input.email ?? ""),
-  })
+  try {
+    await queueN8nSignup({
+      name: String(input.name ?? ""),
+      email: String(input.email ?? ""),
+    })
+  } catch {
+    // Radio can fail; hangar doors still open.
+  }
+  return { ok: true as const }
 }
 
 export async function loginAction(formData: FormData) {
